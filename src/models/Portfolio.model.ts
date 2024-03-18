@@ -1,20 +1,20 @@
 import { model, Schema, Types } from "mongoose";
 // import { EUSER_STATUS } from '../utils/constants/common';
 
-const stockSchema = new Schema(
+const PortfolioSchema = new Schema(
   {
-    stocks: [{
-        stock: {
-            type: Schema.Types.ObjectId,
-            ref: 'Stock',
-            required: true
-        },
-        trades: [{
-            type: Schema.Types.ObjectId,
-            ref: 'Trade',
-            required: true
-        }]
-    }],
+    stock: {
+      type: Schema.Types.ObjectId,
+      ref: "Stock",
+      required: true,
+    },
+    trades: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Trade",
+        required: true,
+      },
+    ],
   },
   {
     versionKey: false,
@@ -22,4 +22,4 @@ const stockSchema = new Schema(
   }
 );
 
-export const Stock = model('Stock', stockSchema);
+export const PortfolioModel = model("Portfolio", PortfolioSchema);

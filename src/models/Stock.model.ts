@@ -1,9 +1,8 @@
 import { model, Schema, Types } from "mongoose";
-// import { EUSER_STATUS } from '../utils/constants/common';
 
 const stockSchema = new Schema(
   {
-    symbol: {
+    name: {
       type: String,
       required: true,
       unique: true, // Assuming each stock symbol is unique
@@ -15,4 +14,4 @@ const stockSchema = new Schema(
   }
 );
 
-export const Stock = model('Stock', stockSchema);
+export const StockModel = model('Stock', stockSchema);

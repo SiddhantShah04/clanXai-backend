@@ -1,7 +1,7 @@
 import { model, Schema, Types } from "mongoose";
 import { ETRADE_TYPES } from "../config";
 
-const stockSchema = new Schema(
+const tradeSchema = new Schema(
   {
     date: {
         type: Date,
@@ -28,4 +28,4 @@ const stockSchema = new Schema(
   }
 );
 
-export const Stock = model('Stock', stockSchema);
+export const TradeModel = model('Trade', tradeSchema);

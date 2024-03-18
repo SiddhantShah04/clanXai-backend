@@ -1,6 +1,9 @@
 import { NextFunction, Request, Response } from "express";
+import TradeService from "../services/trade.service";
 
 class TradeController {
+  public stockService = new TradeService()
+
   public getTrade = async (req: Request, res: Response, next: NextFunction) => {
     try {
       res.status(200).json({ data: [], message: "findAll" });
