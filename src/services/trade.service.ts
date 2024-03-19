@@ -4,9 +4,8 @@ import { TradeModel } from "../models/trade.schema";
 class TradeService {
   public tradeModel = TradeModel;
 
-  public async find(): Promise<any[]> {
-    const trade: any[] = await this.tradeModel.find().populate("Stock");
-    return trade;
+  public findOne(filter: Object): any {
+    return this.tradeModel.findOne(filter);
   }
 
   public async save(data: object): Promise<any> {
@@ -15,6 +14,15 @@ class TradeService {
     // Save the new trade
     await newTrade.save();
     return newTrade;
+  }
+  public updateOne(filter: Object, payload: Object) {
+    return this.tradeModel.findOneAndUpdate(filter, payload, {
+      new: true,
+    });
+  }
+
+  public deleteOne(filter: Object) {
+    return this.tradeModel.deleteOne(filter);
   }
 }
 

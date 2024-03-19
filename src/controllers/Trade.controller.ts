@@ -23,26 +23,28 @@ class TradeController {
     try {
       const { stockId, type, quantity } = req.body;
       // find stock
-      const stockData = await this.stockService.findOne({ _id: new mongoose.Types.ObjectId(stockId) });
+      const stockData = await this.stockService.findOne({
+        _id: new mongoose.Types.ObjectId(stockId),
+      });
       if (!stockData) {
         res.status(404).json({ success: false, message: "Stock not found" });
       }
       const newTrade = await this.tradeService.save({
-        stock:stockData?._id,
+        stock: stockData?._id,
         date: new Date(),
         price: stockData?.price,
         type,
         quantity,
       });
-      
-        await this.portpolioService.save({
-          stockData,
-          tradeId: newTrade._id,
-        });
+
+      await this.portpolioService.save({
+        stockData,
+        tradeId: newTrade._id,
+      });
 
       res.status(200).json({ data: [], message: "findAll" });
     } catch (error) {
-      console.log(error)
+      console.log(error);
       res
         .status(500)
         .json({ success: false, message: "Internal server error" });
@@ -55,7 +57,28 @@ class TradeController {
     next: NextFunction
   ) => {
     try {
-      res.status(200).json({ data: [], message: "findAll" });
+      const { tradeId, type, quantity } = req.body;
+
+      // find stock
+      const tradeData = await this.tradeService.findOne({
+        _id: new mongoose.Types.ObjectId(tradeId),
+      });
+
+      if (!tradeData) {
+        res.status(404).json({ success: false, message: "Stock not found" });
+      }
+
+      const updated = await this.tradeService.updateOne(
+        {
+          _id: new mongoose.Types.ObjectId(tradeId),
+        },
+        {
+          type,
+          quantity,
+        }
+      );
+
+      res.status(200).json({ data: updated, message: "findAll" });
     } catch (error) {
       res
         .status(500)
@@ -69,6 +92,10 @@ class TradeController {
     next: NextFunction
   ) => {
     try {
+      const { tradeId } = req.body;
+      this.tradeService.deleteOne({
+        _id: new mongoose.Types.ObjectId(tradeId),
+      });
       res.status(200).json({ data: [], message: "findAll" });
     } catch (error) {
       res
