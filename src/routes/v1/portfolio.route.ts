@@ -7,5 +7,7 @@ const portfoliocontroller = new PortfolioController();
 
 router.get(`/`, portfoliocontroller.getPortfolio);
 router.get(`/holding`, portfoliocontroller.getHolding);
+router.get(`/returns`, portfoliocontroller.getReturns);
+
 
 export default router;

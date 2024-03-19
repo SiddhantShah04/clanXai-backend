@@ -26,22 +26,22 @@ class PortpolioService {
           from: "stocks", // Name of your Trade collection
           localField: "stock", // Array field referencing Trade IDs
           foreignField: "_id", // Field in Trade that stores document ID
-          as: "stock" // Alias for the joined trade documents
-        }
+          as: "stock", // Alias for the joined trade documents
+        },
       },
       {
-        "$unwind": "$stock"
+        $unwind: "$stock",
       },
       {
         $lookup: {
           from: "trades", // Name of your Trade collection
           localField: "trades", // Array field referencing Trade IDs
           foreignField: "_id", // Field in Trade that stores document ID
-          as: "trades" // Alias for the joined trade documents
-        }
+          as: "trades", // Alias for the joined trade documents
+        },
       },
       {
-        "$unwind": "$trades"
+        $unwind: "$trades",
       },
       {
         $group: {
@@ -51,8 +51,8 @@ class PortpolioService {
               $cond: [
                 { $eq: ["$trades.type", "BUY"] },
                 "$trades.quantity",
-                { $multiply: [-1, "$trades.quantity"] }
-              ]
+                { $multiply: [-1, "$trades.quantity"] },
+              ],
             },
           },
           totalCost: {
@@ -73,11 +73,11 @@ class PortpolioService {
       },
       {
         $project: {
-          _id:0,
+          _id: 0,
           stock: "$_id.name",
-          "totalQuantity": 1,
-          totalCost:1,
-          "averageBuyingPrice": { "$divide": ["$totalCost", "$totalQuantity"] }
+          totalQuantity: 1,
+          totalCost: 1,
+          averageBuyingPrice: { $divide: ["$totalCost", "$totalQuantity"] },
         },
       },
     ]);
@@ -100,6 +100,65 @@ class PortpolioService {
     }
 
     await portfolio.save();
+  }
+  public async returns(): Promise<any> {
+    const portfolio: any[] = await this.portfolioModel.aggregate([
+      {
+        $lookup: {
+          from: "stocks", // Name of your Trade collection
+          localField: "stock", // Array field referencing Trade IDs
+          foreignField: "_id", // Field in Trade that stores document ID
+          as: "stock", // Alias for the joined trade documents
+        },
+      },
+      {
+        $unwind: "$stock",
+      },
+      {
+        $lookup: {
+          from: "trades", // Name of your Trade collection
+          localField: "trades", // Array field referencing Trade IDs
+          foreignField: "_id", // Field in Trade that stores document ID
+          as: "trades", // Alias for the joined trade documents
+        },
+      },
+      {
+        $unwind: "$trades",
+      },
+      {
+        $group: {
+          _id: null,
+          totalInvestment: {
+            $sum: {
+              $cond: [{ $eq: ["$trades.type", "BUY"] }, "$trades.price", 0],
+            },
+          },
+          totalReturns: {
+            $sum: {
+              $cond: [{ $eq: ["$trades.type", "SELL"] }, "$trades.price", 0],
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          totalInvestment: 1,
+          totalReturns: 1,
+          cumulativeReturn: {
+            $multiply: [
+              {
+                $divide: [
+                  { $subtract: ["$totalReturns", "$totalInvestment"] },
+                  "$totalInvestment",
+                ],
+              },
+              100,
+            ],
+          },
+        },
+      },
+    ]);
+    return portfolio;
   }
 }
 
