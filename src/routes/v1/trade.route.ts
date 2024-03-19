@@ -5,7 +5,8 @@ const router: Router = express.Router();
 
 const tradecontroller = new TradeController();
 
-router.post(`/`, tradecontroller.getTrade);
+router.get(`/`, tradecontroller.getTrade);
+router.post(`/`, tradecontroller.addTrade);
 router.patch(`/`, tradecontroller.updateTrade);
 router.delete(`/`, tradecontroller.getTrade);
 

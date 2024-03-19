@@ -16,6 +16,10 @@ const tradeSchema = new Schema(
         enum: ETRADE_TYPES,
         required: true
     },
+    quantity:{
+      type:Number,
+      required: true
+    },
     stock: {
         type: Schema.Types.ObjectId,
         ref: 'Stock',

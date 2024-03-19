@@ -7,11 +7,16 @@ const stockSchema = new Schema(
       required: true,
       unique: true, // Assuming each stock symbol is unique
     },
+    price: {
+      type: Number,
+      required: true,
+    },
   },
+
   {
     versionKey: false,
     timestamps: true,
   }
 );
 
-export const StockModel = model('Stock', stockSchema);
+export const StockModel = model("Stock", stockSchema);

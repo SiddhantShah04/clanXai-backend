@@ -1,5 +1,4 @@
 import { model, Schema, Types } from "mongoose";
-// import { EUSER_STATUS } from '../utils/constants/common';
 
 const PortfolioSchema = new Schema(
   {
