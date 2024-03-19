@@ -27,7 +27,7 @@ class PortfolioController {
     next: NextFunction
   ) => {
     try {
-     const resp = await this.portpolioService.getHolding()
+           const resp = await this.portpolioService.getHolding()
       res.status(200).json({ data: resp, message: "findAll" });
     } catch (error) {
       console.log(error)
