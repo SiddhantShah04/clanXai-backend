@@ -13,8 +13,14 @@ class PortfolioController {
     next: NextFunction
   ) => {
     try {
+      const page = req.query.page ? parseInt(req.query.page as string) : 1;
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+      
+      //pgaination
+      const skip = (page - 1) * (limit || 10);
+
       // Fetch portfolio data
-      const portfolioData = await this.portpolioService.find();
+      const portfolioData = await this.portpolioService.find(skip,limit);
 
       // Send response
       res.status(200).json({ data: portfolioData, success: true, message: "Portfolio data retrieved successfully" });

@@ -4,11 +4,11 @@ import { PortfolioModel } from "../models/Portfolio.model";
 class PortpolioService {
   public portfolioModel = PortfolioModel;
 
-  public async find(): Promise<any[]> {
+  public async find(skip:number,limit:number): Promise<any[]> {
     const portfolio: any[] = await this.portfolioModel
       .find()
       .populate("stock")
-      .populate("trades");
+      .populate("trades").skip(skip).limit(limit).exec();
     return portfolio;
   }
 
