@@ -12,7 +12,7 @@ class PortfolioController {
   ) => {
     try {
       const resp = await this.portpolioService.find();
-      res.status(200).json({ data: resp, message: "findAll" });
+      res.status(200).json({ data: resp, success:true,message: "findAll" });
     } catch (error) {
       console.log(error);
       res
@@ -27,8 +27,68 @@ class PortfolioController {
     next: NextFunction
   ) => {
     try {
-      const resp = await this.portpolioService.getHolding();
-      res.status(200).json({ data: resp, message: "findAll" });
+      const resp = await this.portpolioService.aggregate([
+        {
+          $lookup: {
+            from: "stocks", // Name of your Trade collection
+            localField: "stock", // Array field referencing Trade IDs
+            foreignField: "_id", // Field in Trade that stores document ID
+            as: "stock", // Alias for the joined trade documents
+          },
+        },
+        {
+          $unwind: "$stock",
+        },
+        {
+          $lookup: {
+            from: "trades", // Name of your Trade collection
+            localField: "trades", // Array field referencing Trade IDs
+            foreignField: "_id", // Field in Trade that stores document ID
+            as: "trades", // Alias for the joined trade documents
+          },
+        },
+        {
+          $unwind: "$trades",
+        },
+        {
+          $group: {
+            _id: "$stock",
+            totalQuantity: {
+              $sum: {
+                $cond: [
+                  { $eq: ["$trades.type", "BUY"] },
+                  "$trades.quantity",
+                  { $multiply: [-1, "$trades.quantity"] },
+                ],
+              },
+            },
+            totalCost: {
+              $sum: {
+                $multiply: [
+                  {
+                    $cond: [
+                      { $eq: ["$trades.type", "BUY"] },
+                      "$trades.quantity",
+                      { $multiply: [-1, "$trades.quantity"] },
+                    ],
+                  },
+                  "$trades.price",
+                ],
+              },
+            },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            stock: "$_id.name",
+            totalQuantity: 1,
+            totalCost: 1,
+            averageBuyingPrice: { $divide: ["$totalCost", "$totalQuantity"] },
+          },
+        },
+      ]);
+      res.status(200).json({ data: resp, success:true,message: "findAll" });
     } catch (error) {
       console.log(error);
       res
@@ -43,8 +103,63 @@ class PortfolioController {
     next: NextFunction
   ) => {
     try {
-      const resp = await this.portpolioService.returns();
-      res.status(200).json({ data: resp, message: "findAll" });
+      const resp = await this.portpolioService.aggregate([
+        {
+          $lookup: {
+            from: "stocks", // Name of your Trade collection
+            localField: "stock", // Array field referencing Trade IDs
+            foreignField: "_id", // Field in Trade that stores document ID
+            as: "stock", // Alias for the joined trade documents
+          },
+        },
+        {
+          $unwind: "$stock",
+        },
+        {
+          $lookup: {
+            from: "trades", // Name of your Trade collection
+            localField: "trades", // Array field referencing Trade IDs
+            foreignField: "_id", // Field in Trade that stores document ID
+            as: "trades", // Alias for the joined trade documents
+          },
+        },
+        {
+          $unwind: "$trades",
+        },
+        {
+          $group: {
+            _id: null,
+            totalInvestment: {
+              $sum: {
+                $cond: [{ $eq: ["$trades.type", "BUY"] }, "$trades.price", 0],
+              },
+            },
+            totalReturns: {
+              $sum: {
+                $cond: [{ $eq: ["$trades.type", "SELL"] }, "$trades.price", 0],
+              },
+            },
+          },
+        },
+        {
+          $project: {
+            totalInvestment: 1,
+            totalReturns: 1,
+            cumulativeReturn: {
+              $multiply: [
+                {
+                  $divide: [
+                    { $subtract: ["$totalReturns", "$totalInvestment"] },
+                    "$totalInvestment",
+                  ],
+                },
+                100,
+              ],
+            },
+          },
+        },
+      ]);
+      res.status(200).json({ data: resp, success:true,message: "Returns" });
     } catch (error) {
       console.log(error);
       res

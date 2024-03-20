@@ -9,15 +9,6 @@ class TradeController {
   public stockService = new StockService();
   public portpolioService = new PortpolioService();
 
-  public getTrade = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      res.status(200).json({ data: [], message: "findAll" });
-    } catch (error) {
-      res
-        .status(500)
-        .json({ success: false, message: "Internal server error" });
-    }
-  };
 
   public addTrade = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -27,7 +18,7 @@ class TradeController {
         _id: new mongoose.Types.ObjectId(stockId),
       });
       if (!stockData) {
-        res.status(404).json({ success: false, message: "Stock not found" });
+        res.status(404).json({ success:false, message: "Stock not found" });
       }
       const newTrade = await this.tradeService.save({
         stock: stockData?._id,
@@ -42,9 +33,8 @@ class TradeController {
         tradeId: newTrade._id,
       });
 
-      res.status(200).json({ data: [], message: "findAll" });
+      res.status(200).json({ success:false,data: [], message: "Added trade ", });
     } catch (error) {
-      console.log(error);
       res
         .status(500)
         .json({ success: false, message: "Internal server error" });
@@ -65,7 +55,7 @@ class TradeController {
       });
 
       if (!tradeData) {
-        res.status(404).json({ success: false, message: "Stock not found" });
+        res.status(404).json({ success:false,message: "Stock not found" });
       }
 
       const updated = await this.tradeService.updateOne(
@@ -78,7 +68,7 @@ class TradeController {
         }
       );
 
-      res.status(200).json({ data: updated, message: "findAll" });
+      res.status(200).json({ success:false, data: updated, message: "updated successfully" });
     } catch (error) {
       res
         .status(500)
@@ -96,7 +86,7 @@ class TradeController {
       this.tradeService.deleteOne({
         _id: new mongoose.Types.ObjectId(tradeId),
       });
-      res.status(200).json({ data: [], message: "findAll" });
+      res.status(200).json({ success:false,data: [], message: "removed trade" });
     } catch (error) {
       res
         .status(500)
