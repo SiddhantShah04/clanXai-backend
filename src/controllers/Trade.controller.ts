@@ -11,7 +11,7 @@ class TradeController {
 
   // Add new trade
   public addTrade = async (req: Request, res: Response, next: NextFunction) => {
-    const session = await mongoose.startSession();
+        const session = await mongoose.startSession();
     session.startTransaction();
     try {
       const { stockId, type, quantity } = req.body;
@@ -43,9 +43,17 @@ class TradeController {
         tradeId: newTrade._id,
       },session);
 
+
+      
+    // Commit the transaction
+    await session.commitTransaction();
+    session.endSession();
+
       // Send success response
       res.status(200).json({ success: true, data: newTrade, message: "Trade added successfully" });
     } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
       console.error("Error adding trade:", error);
       res.status(500).json({ success: false, message: "Internal server error" });
     }

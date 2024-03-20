@@ -157,7 +157,7 @@ class PortfolioController {
                     "$totalInvestment",
                   ],
                 },
-                100,
+                100, //final price
               ],
             },
           },
