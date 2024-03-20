@@ -1,3 +1,4 @@
+import { ClientSession } from "mongoose";
 import { PortfolioModel } from "../models/Portfolio.model";
 import { TradeModel } from "../models/trade.schema";
 
@@ -8,11 +9,11 @@ class TradeService {
     return this.tradeModel.findOne(filter);
   }
 
-  public async save(data: object): Promise<any> {
+  public async save(data: object, session: ClientSession): Promise<any> {
     const newTrade = new this.tradeModel(data);
 
     // Save the new trade
-    await newTrade.save();
+    await newTrade.save({ session: session as ClientSession });
     return newTrade;
   }
   public updateOne(filter: Object, payload: Object) {

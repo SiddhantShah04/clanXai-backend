@@ -1,96 +1,100 @@
 import { NextFunction, Request, Response } from "express";
 import TradeService from "../services/trade.service";
 import StockService from "../services/stock.service";
-import PortpolioService from "../services/portpolio.service";
+import PortfolioService from "../services/portfolio.service";
 import mongoose from "mongoose";
 
 class TradeController {
   public tradeService = new TradeService();
   public stockService = new StockService();
-  public portpolioService = new PortpolioService();
+  public portfolioService = new PortfolioService();
 
-
+  // Add new trade
   public addTrade = async (req: Request, res: Response, next: NextFunction) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
     try {
       const { stockId, type, quantity } = req.body;
-      // find stock
+
+      // Find stock by ID
       const stockData = await this.stockService.findOne({
         _id: new mongoose.Types.ObjectId(stockId),
       });
+
+      // If stock not found, return 404
       if (!stockData) {
-        res.status(404).json({ success:false, message: "Stock not found" });
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(404).json({ success: false, message: "Stock not found" });
       }
+
+      // Create new trade
       const newTrade = await this.tradeService.save({
-        stock: stockData?._id,
+        stock: stockData._id,
         date: new Date(),
-        price: stockData?.price,
+        price: stockData.price,
         type,
         quantity,
-      });
+      },session);
 
-      await this.portpolioService.save({
+      // Update portfolio with new trade
+      await this.portfolioService.save({
         stockData,
         tradeId: newTrade._id,
-      });
+      },session);
 
-      res.status(200).json({ success:false,data: [], message: "Added trade ", });
+      // Send success response
+      res.status(200).json({ success: true, data: newTrade, message: "Trade added successfully" });
     } catch (error) {
-      res
-        .status(500)
-        .json({ success: false, message: "Internal server error" });
+      console.error("Error adding trade:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
     }
   };
 
-  public updateTrade = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
+  // Update existing trade
+  public updateTrade = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { tradeId, type, quantity } = req.body;
 
-      // find stock
+      // Find trade by ID
       const tradeData = await this.tradeService.findOne({
         _id: new mongoose.Types.ObjectId(tradeId),
       });
 
+      // If trade not found, return 404
       if (!tradeData) {
-        res.status(404).json({ success:false,message: "Stock not found" });
+        return res.status(404).json({ success: false, message: "Trade not found" });
       }
 
-      const updated = await this.tradeService.updateOne(
-        {
-          _id: new mongoose.Types.ObjectId(tradeId),
-        },
-        {
-          type,
-          quantity,
-        }
+      // Update trade
+      const updatedTrade = await this.tradeService.updateOne(
+        { _id: new mongoose.Types.ObjectId(tradeId) },
+        { type, quantity }
       );
 
-      res.status(200).json({ success:false, data: updated, message: "updated successfully" });
+      // Send success response
+      res.status(200).json({ success: true, data: updatedTrade, message: "Trade updated successfully" });
     } catch (error) {
-      res
-        .status(500)
-        .json({ success: false, message: "Internal server error" });
+      console.error("Error updating trade:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
     }
   };
 
-  public removeTrade = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
+  // Remove trade
+  public removeTrade = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { tradeId } = req.body;
-      this.tradeService.deleteOne({
+
+      // Delete trade by ID
+      await this.tradeService.deleteOne({
         _id: new mongoose.Types.ObjectId(tradeId),
       });
-      res.status(200).json({ success:false,data: [], message: "removed trade" });
+
+      // Send success response
+      res.status(200).json({ success: true, data: [], message: "Trade removed successfully" });
     } catch (error) {
-      res
-        .status(500)
-        .json({ success: false, message: "Internal server error" });
+      console.error("Error removing trade:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
     }
   };
 }

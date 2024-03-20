@@ -1,4 +1,4 @@
-import { Aggregate, PipelineStage } from "mongoose";
+import { Aggregate, ClientSession, PipelineStage } from "mongoose";
 import { PortfolioModel } from "../models/Portfolio.model";
 
 class PortpolioService {
@@ -24,7 +24,7 @@ class PortpolioService {
     return  this.portfolioModel.aggregate(payload);
   }
 
-  public async save(Data: any): Promise<any> {
+  public async save(Data: any,session:ClientSession): Promise<any> {
     const { stockData, tradeId } = Data;
     let portfolio = await this.findOne({
       stock: stockData?._id,
@@ -39,7 +39,7 @@ class PortpolioService {
       portfolio.trades.push(tradeId);
     }
 
-    await portfolio.save();
+    await portfolio.save({session: session as ClientSession});
   }
 }
 

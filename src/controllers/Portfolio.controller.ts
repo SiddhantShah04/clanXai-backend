@@ -1,23 +1,26 @@
 import { NextFunction, Request, Response } from "express";
-import PortpolioService from "../services/portpolio.service";
+import PortpolioService from "../services/portfolio.service";
 import StockService from "../services/stock.service";
 
 class PortfolioController {
   public portpolioService = new PortpolioService();
   public stockService = new StockService();
+
+  // Get portfolio with trades
   public getPortfolio = async (
     req: Request,
     res: Response,
     next: NextFunction
   ) => {
     try {
-      const resp = await this.portpolioService.find();
-      res.status(200).json({ data: resp, success:true,message: "findAll" });
+      // Fetch portfolio data
+      const portfolioData = await this.portpolioService.find();
+
+      // Send response
+      res.status(200).json({ data: portfolioData, success: true, message: "Portfolio data retrieved successfully" });
     } catch (error) {
-      console.log(error);
-      res
-        .status(500)
-        .json({ success: false, message: "Internal server error" });
+      console.error("Error retrieving portfolio data:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
     }
   };
 
@@ -27,6 +30,7 @@ class PortfolioController {
     next: NextFunction
   ) => {
     try {
+            // Fetch aggregate holdings view
       const resp = await this.portpolioService.aggregate([
         {
           $lookup: {
@@ -88,9 +92,9 @@ class PortfolioController {
           },
         },
       ]);
-      res.status(200).json({ data: resp, success:true,message: "findAll" });
+      res.status(200).json({ data: resp, success: true, message: "findAll" });
     } catch (error) {
-      console.log(error);
+      console.error("Error retrieving holdings data:", error);
       res
         .status(500)
         .json({ success: false, message: "Internal server error" });
@@ -159,9 +163,9 @@ class PortfolioController {
           },
         },
       ]);
-      res.status(200).json({ data: resp, success:true,message: "Returns" });
+      res.status(200).json({ data: resp, success: true, message: "Returns" });
     } catch (error) {
-      console.log(error);
+      console.error("Error calculating cumulative returns:", error);
       res
         .status(500)
         .json({ success: false, message: "Internal server error" });
